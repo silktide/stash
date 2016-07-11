@@ -1,0 +1,26 @@
+{
+    "name": "silktide/stash",
+    "description": "Extremely simple caching library. Can't really get any more simple",
+    "authors": [
+        {
+            "name": "Doug",
+            "email": "dougnelson@silktide.com"
+        }
+    ],
+    "suggest": {
+        "aws/aws-sdk-php": "Allows caching to S3"
+    },
+    "require": {},
+    "autolaoder": {
+        "psr-4": {
+            "Silktide\\Stash\\": "src/"
+        }
+    },
+    "extra": {
+        "downsider-puzzle-di": {
+            "silktide/syringe": {
+                "path": "config/syringe.yml"
+            }
+        }
+    }
+}
