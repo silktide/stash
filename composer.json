@@ -11,7 +11,7 @@
         "aws/aws-sdk-php": "Allows caching to S3"
     },
     "require": {},
-    "autoloader": {
+    "autoload": {
         "psr-4": {
             "Silktide\\Stash\\": "src/"
         }
