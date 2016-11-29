@@ -13,7 +13,7 @@
     },
     "require": {
     },
-    "autoloader": {
+    "autoload": {
         "psr-4": {
             "Silktide\\Stash\\": "src/"
         }
