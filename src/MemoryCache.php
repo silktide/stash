@@ -24,19 +24,6 @@ class MemoryCache implements SimpleCacheInterface
         ];
     }
 
-    protected function checkForExpiry($key)
-    {
-        if (isset($this->cache[$key])) {
-            /**
-             * @var \DateTime $ttl
-             */
-            $ttl = $this->cache[$key]["ttl"];
-            if ($ttl->getTimestamp() < time()) {
-                unset($this->cache[$key]);
-            }
-        }
-    }
-
     public function get($key)
     {
         $this->checkForExpiry($key);
@@ -53,6 +40,22 @@ class MemoryCache implements SimpleCacheInterface
         $this->checkForExpiry($key);
         return (isset($this->cache[$key]));
     }
-    
-    
+
+    public function delete($key)
+    {
+        unset($this->cache[$key]);
+    }
+
+    protected function checkForExpiry($key)
+    {
+        if (isset($this->cache[$key])) {
+            /**
+             * @var \DateTime $ttl
+             */
+            $ttl = $this->cache[$key]["ttl"];
+            if ($ttl->getTimestamp() < time()) {
+                unset($this->cache[$key]);
+            }
+        }
+    }
 }

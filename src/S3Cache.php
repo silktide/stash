@@ -3,7 +3,11 @@
 
 namespace Silktide\Stash;
 
+use Aws\AwsClient;
 use Aws\S3\S3Client;
+use Silktide\Stash\Exception\UnsupportedCacheException;
+use Silktide\Stash\S3\Version2Layer;
+use Silktide\Stash\S3\Version3Layer;
 
 class S3Cache implements SimpleCacheInterface
 {
@@ -11,42 +15,57 @@ class S3Cache implements SimpleCacheInterface
 
     const BUCKET = "cache.silktide.com";
 
-    protected $s3Client;
     protected $defaultTTL;
 
-    public function __construct(S3Client $s3Client)
-    {
-        $this->s3Client = $s3Client;
-        $this->defaultTTL = new \DateInterval("PT24H");
-    }
+    /**
+     * @var SimpleCacheInterface
+     */
+    protected $layer;
 
-    public function set($key, $value, $ttl = null)
+    public function __construct(LockParser $lockParser)
     {
-        try{
-            $this->s3Client->putObject([
-                "Bucket" => self::BUCKET,
-                "Key" => $key,
-                "Body" => $value, // AWS can handle if this is a resource natively
-                "Expires" => $this->ttlToDateTime($ttl, $this->defaultTTL)
-            ]);
-        } catch(\Exception $e) {
-            throw new \RuntimeException("Unable to set object in S3Cache '{$key}''");
+        $this->defaultTTL = new \DateInterval("PT24H");
+
+        $awsKey = "aws/aws-sdk-php";
+        if (!$lockParser->exists($awsKey)) {
+            throw new UnsupportedCacheException("No AWS SDK is installed");
+        }
+
+
+        $version = $lockParser->getVersion($awsKey);
+        $explodedVersion = explode(".", $version);
+
+
+        switch((int)$explodedVersion[0]){
+            case 3:
+                return new Version3Layer($this->defaultTTL);
+
+            case 2:
+                return new Version2Layer($this->defaultTTL);
+
+            default:
+                throw new UnsupportedCacheException("AWS SDK Version {$version} is not currently supported");
         }
     }
 
     public function get($key)
     {
-        $result = $this->s3Client->getObject([
-            "Bucket" => self::BUCKET,
-            "Key" => $key
-        ]);
+        return $this->layer->get($key);
+    }
 
-        return (string) $result['Body'];
+    public function delete($key)
+    {
+        $this->layer->delete($key);
     }
 
     public function exists($key)
     {
-        return $this->s3Client->doesObjectExist(self::BUCKET, $key);
+        return $this->layer->exists($key);
+    }
+
+    public function set($key, $value, $ttl = null)
+    {
+        $this->layer->set($key, $value, $ttl);
     }
 }
 

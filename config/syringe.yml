@@ -1,15 +1,5 @@
+parameters:
+
 services:
-    stash.memory_cache:
-      class: Silktide\Stash\MemoryCache
-
-    stash.s3_cache:
-      class: Silktide\Stash\S3Cache
-      arguments:
-        - "@s3.client"
-
-    s3_client:
-        class: \Aws\S3\S3Client
-        factoryClass: \Aws\S3\S3Client
-        factoryMethod: factory
-        arguments:
-         - region: us-east-1
+  factory:
+    class: Silktide\Stash\Factory

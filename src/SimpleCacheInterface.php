@@ -25,4 +25,10 @@ interface SimpleCacheInterface
      */
     public function exists($key);
 
+
+    /**
+     * @param $key
+     * @return mixed
+     */
+    public function delete($key);
 }
